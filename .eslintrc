@@ -1,0 +1,36 @@
+{
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true
+  },
+  "extends": [
+    // "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:nuxt/recommended",
+    "plugin:vue/vue3-strongly-recommended",
+    // "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "parser": "@typescript-eslint/parser",
+    "extraFileExtensions": [ ".vue" ]
+  },
+  "plugins": ["@typescript-eslint", "vue", "prettier"],
+  "rules": {
+    "semi": ["warn", "never"],
+    "quotes": [
+      2,
+      "single",
+      { "avoidEscape": true, "allowTemplateLiterals": true }
+    ],    
+    "vue/multi-word-component-names": "off", /* Allows pages can have index.vue and/or layouts can have default.vue */
+    "@typescript-eslint/no-var-requires": "off", /* Allows `import foo = require('foo')` */
+    "no-unused-vars": "off", /* This rule does not work with type definitions */
+    "no-undef": "off" /* Enable Nuxt auto import feature*/
+  },
+  "ignorePatterns": ["node_modules", "build", "dist", "public"]
+}
