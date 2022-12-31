@@ -4,7 +4,7 @@
       <div class="mx-auto w-80 overflow-hidden rounded-2xl bg-white shadow-lg">
         <div class="px-10 py-5">
           <div class="text-3xl font-bold">Log In</div>
-          <form class="mt-10">
+          <form class="mt-10" @submit.prevent="handleloginSubmit">
             <div class="relative">
               <input
                 id="email"
@@ -33,10 +33,42 @@
             </div>
             <button
               type="submit"
-              class="mt-20 block w-full cursor-pointer rounded bg-rose-500 px-4 py-2 text-center font-semibold text-white hover:bg-rose-400 focus:outline-none focus:ring focus:ring-rose-500 focus:ring-opacity-80 focus:ring-offset-2">Log in</button>
+              class="mt-20 block w-full cursor-pointer rounded bg-rose-500 px-4 py-2 text-center font-semibold text-white hover:bg-rose-400 focus:outline-none focus:ring focus:ring-rose-500 focus:ring-opacity-80 focus:ring-offset-2">
+              Log in
+            </button>
           </form>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+const handleloginSubmit = (e: Event) => {
+  const target = e.target as HTMLFormElement
+  const form = new FormData(target)
+  const inputs = Object.fromEntries(form.entries())
+
+  // console.log('>>> Login Submitted')
+  loginRequest(inputs)
+}
+
+const emit = defineEmits(['success'])
+
+async function loginRequest(data: object) {
+  const url = '/login'
+  await useFetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    body: data,
+  })
+    .then((response) => {
+      console.log('>>> Login request', response)
+      // localStorage.setItem('token', response.data)
+      emit('success')
+    })
+    .catch((error) => console.log('>>> Request error', error))
+}
+</script>
