@@ -1,12 +1,16 @@
 <template>
   <div class="flex min-h-screen items-center justify-center bg-violet-300">
     <div class="flex-1 p-10">
+      <PageErrorbanner
+        v-show="formInput.error.length > 0"
+        :msg="formInput.error" />
       <div class="mx-auto w-80 overflow-hidden rounded-2xl bg-white shadow-lg">
         <div class="px-10 py-5">
           <div class="text-3xl font-bold">Log In</div>
-          <form class="mt-10" @submit.prevent="handleloginSubmit">
+          <form class="mt-10" @submit.prevent="onLoginClick">
             <div class="relative">
               <input
+                v-model="formInput.data.email"
                 id="email"
                 name="email"
                 type="text"
@@ -20,6 +24,7 @@
             </div>
             <div class="relative mt-10">
               <input
+                v-model="formInput.data.password"
                 id="password"
                 type="password"
                 name="password"
@@ -30,6 +35,16 @@
                 class="absolute left-0 -top-3.5 text-sm text-gray-600 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-gray-600"
                 >Password</label
               >
+            </div>
+            <div class="mt-10">
+              <label for="rememberMe" class="inline-block cursor-pointer">
+                <span class="ml-2">Remember Me</span>
+                <input
+                  v-model="formInput.data.rememberMe"
+                  id="rememberMe"
+                  type="checkbox"
+                  class="float-left mt-1 mr-2 h-4 w-4 cursor-pointer rounded-sm border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top accent-blue-600 transition duration-200 checked:border-blue-600 checked:bg-blue-600 focus:outline-none" />
+              </label>
             </div>
             <button
               type="submit"
@@ -44,31 +59,34 @@
 </template>
 
 <script setup lang="ts">
-const handleloginSubmit = (e: Event) => {
-  const target = e.target as HTMLFormElement
-  const form = new FormData(target)
-  const inputs = Object.fromEntries(form.entries())
+import { useAuthStore } from '~~/stores/useAuthStore'
 
-  // console.log('>>> Login Submitted')
-  loginRequest(inputs)
-}
-
+const authStore = useAuthStore()
 const emit = defineEmits(['success'])
 
-async function loginRequest(data: object) {
-  const url = '/login'
-  await useFetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-    body: data,
-  })
-    .then((response) => {
-      console.log('>>> Login request', response)
-      // localStorage.setItem('token', response.data)
-      emit('success')
-    })
-    .catch((error) => console.log('>>> Request error', error))
+const formInput = reactive({
+  data: { email: '', password: '', rememberMe: false },
+  error: '',
+  pending: false,
+})
+
+const onLoginClick = async () => {
+  try {
+    formInput.error = ''
+    formInput.pending = true
+
+    await authStore.login(
+      formInput.data.email,
+      formInput.data.password,
+      formInput.data.rememberMe
+    )
+
+    emit('success')
+  } catch (e: any) {
+    console.error(e)
+    formInput.error = e.message
+  } finally {
+    formInput.pending = false
+  }
 }
 </script>

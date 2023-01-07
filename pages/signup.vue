@@ -1,18 +1,13 @@
 <template>
-  <SignupForm @success="onLoginSuccess"/>
+  <SignupForm @success="onSignupSuccess" />
 </template>
 
-<script lang="ts">
-export default defineComponent({
-  name: 'SignupPage',
-  setup(){
-    async function onLoginSuccess() {
-      await navigateTo('/login')
-    }
-
-    return{
-      onLoginSuccess
-    }
-  }
+<script setup lang="ts">
+definePageMeta({
+  middleware: ['guest-only'],
 })
+
+async function onSignupSuccess() {
+  await navigateTo('/login')
+}
 </script>

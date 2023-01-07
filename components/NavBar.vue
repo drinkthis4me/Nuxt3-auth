@@ -76,12 +76,14 @@
               >
 
               <NuxtLink
+                v-show="isGuest"
                 to="/Login"
                 class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                 >Login</NuxtLink
               >
 
               <NuxtLink
+                v-show="isGuest"
                 to="/signup"
                 class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
                 >Signup</NuxtLink
@@ -92,12 +94,14 @@
         <div
           class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
           <button
-            @click="handleLogout"
+            v-show="!isGuest"
+            :disabled="logoutPending"
+            @click="onLogoutClick"
             type="button"
             class="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
             <span class="sr-only">View notifications</span>
             <!-- Heroicon name: outline/bell -->
-            Logout
+            Log Out
           </button>
 
           <!-- Profile dropdown -->
@@ -158,7 +162,7 @@
                 role="menuitem"
                 tabindex="-1"
                 id="user-menu-item-2"
-                >Sign out</a
+                >Logout out</a
               >
             </div>
           </div>
@@ -199,23 +203,28 @@
   </nav>
 </template>
 
-<script>
-export default defineComponent({
-  name: 'NavBar',
-  setup() {
-    const dropDownMenu = ref(false)
-    const mobileMenu = ref(false)
+<script setup lang="ts">
+import { useAuthStore } from '~~/stores/useAuthStore'
 
-    const handleLogout = ()=>{
-      // localStorage.removeItem('token')
-      navigateTo('/')
-    }
-    return {
-      dropDownMenu,
-      mobileMenu,
 
-      handleLogout,
-    }
-  },
+const authStore = useAuthStore()
+
+const dropDownMenu = ref(false)
+const mobileMenu = ref(false)
+const logoutPending = ref(false)
+const isGuest = computed(() => {
+  return authStore.currentUser ? false : true
 })
+
+const onLogoutClick = async () => {
+  try {
+    logoutPending.value = true
+    await authStore.logout()
+    await navigateTo('/')
+  } catch (e) {
+    console.error('>>> Logout error', e)
+  } finally {
+    logoutPending.value = false
+  }
+}
 </script>

@@ -1,12 +1,16 @@
 <template>
   <div class="flex min-h-screen items-center justify-center bg-violet-300">
     <div class="flex-1 p-10">
+      <PageErrorbanner
+        v-show="formInput.error.length > 0"
+        :msg="formInput.error" />
       <div class="mx-auto w-80 overflow-hidden rounded-2xl bg-white shadow-lg">
         <div class="px-10 py-5">
           <div class="text-3xl font-bold">Sign up</div>
-          <form class="mt-10" @submit.prevent="handleSignupSubmit">
+          <form class="mt-10" @submit.prevent="onSignupClick">
             <div class="relative">
               <input
+                v-model="formInput.data.email"
                 id="email"
                 name="email"
                 type="text"
@@ -20,6 +24,7 @@
             </div>
             <div class="relative mt-10">
               <input
+                v-model="formInput.data.password"
                 id="password"
                 type="password"
                 name="password"
@@ -33,6 +38,7 @@
             </div>
             <div class="relative mt-10">
               <input
+                v-model="formInput.data.confirmPassword"
                 id="password_confirm"
                 type="password"
                 name="password_confirm"
@@ -57,29 +63,44 @@
 </template>
 
 <script setup lang="ts">
-const handleSignupSubmit = (e: Event) => {
-  const target = e.target as HTMLFormElement
-  const form = new FormData(target)
-  const inputs = Object.fromEntries(form.entries())
-  // console.log(inputs)
-  signupRequest(inputs)
-}
+import { useAuthStore } from '~~/stores/useAuthStore'
 
+const authStore = useAuthStore()
 const emit = defineEmits(['success'])
 
-async function signupRequest(data: object) {
-  const url = '/signup'
-  await useFetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-    body: data,
-  })
-    .then((response) => {
-      emit('success')
-      console.log('>>> Signup request', response)
+const formInput = reactive({
+  data: {
+    email: '',
+    password: '',
+    confirmPassword: '',
+  },
+  error: '',
+  pending: false,
+})
+
+const pwValidator = () => {
+  if (formInput.data.password === formInput.data.confirmPassword) {
+    return
+  } else {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'Passwords are different',
     })
-    .catch((error) => console.log('>>> Request error', error))
+  }
+}
+
+const onSignupClick = async () => {
+  try {
+    formInput.error = ''
+    formInput.pending = true
+    pwValidator()
+    await authStore.signup(formInput.data.email, formInput.data.password)
+    emit('success')
+  } catch (e: any) {
+    console.error(e)
+    formInput.error = e.message
+  } finally {
+    formInput.pending = false
+  }
 }
 </script>
