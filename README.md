@@ -154,5 +154,7 @@ Planned: hash the password
 ## api/users.get.ts
 List of all user.
 - Read and check authorization header.
+- Verify the token.
+- Check if the request is from ADMIN.
 - Simulate fetching delay by setTimeout.
-- Return all users list
+- Return all-users list.
