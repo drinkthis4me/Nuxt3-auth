@@ -1,6 +1,8 @@
 import { getUserByEmail, addNewUser } from '~~/server/db/user'
 import type { SingupBody } from '~~/types/user'
+import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+
 export default defineEventHandler(async (event) => {
   const body = await readBody<SingupBody>(event)
 
@@ -20,11 +22,14 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Hash the password
+  const hashPw = await bcrypt.hash(body.password, 10)
+
   // Create a new user
   const newUser = {
     id: new Date().toString(),
     email: body.email,
-    password: body.password,
+    password: hashPw,
     roles: ['USER'],
   }
 
