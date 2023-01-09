@@ -47,7 +47,6 @@ export const useAuthStore = defineStore('auth', () => {
       method: 'GET',
     })
       .then((response) => {
-        console.log('>>> whoAmI request: ', response)
         currentUser.value = response.user
       })
       .catch((e) => console.log('>>> whoAmI error: ', e))

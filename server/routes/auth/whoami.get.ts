@@ -5,10 +5,9 @@ export default defineEventHandler(async (event) => {
   const cookieWithToken = getCookie(event, 'access_token')
 
   if (!cookieWithToken)
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    })
+    return{
+      user: null
+    }
 
   // Verify the old token
   const secret = useRuntimeConfig().JWT_secret
