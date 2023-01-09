@@ -32,9 +32,21 @@ export default defineEventHandler(async (event) => {
 
   // Issue a jwt token
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const {password, ...payload} = newUser 
+  const { password, ...payload } = newUser
   const secret = useRuntimeConfig().JWT_secret
   const jwtToken = jwt.sign(payload, secret, { expiresIn: '24h' })
+
+  // Store the token in a cookie
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 1) /** One day from now */
+
+  setCookie(event, 'access_token', jwtToken, {
+    expires: expiresAt,
+    httpOnly: true,
+    // secure: process.env.NODE_ENV === 'production', /** For HTTPS connection */
+    sameSite: 'strict',
+    path: '/',
+  })
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _password, ...newUserWithoutPw } = newUser

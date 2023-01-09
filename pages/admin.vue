@@ -56,6 +56,6 @@ definePageMeta({
 const errorMsg = ref('')
 
 const { data: users, pending } = await useLazyFetch('/api/users', {
-  // headers: useRequestHeaders(['cookie']) as HeadersInit,
+  method: 'GET'
 }).catch((e) => (errorMsg.value = e))
 </script>

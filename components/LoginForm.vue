@@ -82,9 +82,9 @@ const onLoginClick = async () => {
     )
 
     emit('success')
-  } catch (e: any) {
+  } catch (e) {
+    if (e instanceof Error) formInput.error = e.message
     console.error(e)
-    formInput.error = e.message
   } finally {
     formInput.pending = false
   }

@@ -1,11 +1,13 @@
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const cookieWithToken = getCookie(event, 'access_token')
 
-  if(!body.jwtToken)
+  if(!cookieWithToken)
   throw createError({
     statusCode: 400,
     statusMessage: 'Bad request',
   })
+
+  deleteCookie(event, 'access_token')
  
   return {
     user: null,

@@ -2,16 +2,15 @@ import jwt from 'jsonwebtoken'
 import { UserJwtPayload } from '~~/types/user'
 
 export default defineEventHandler(async (event) => {
-  const header = event.node.req.headers
+  const cookieWithToken = getCookie(event, 'access_token')
 
-  if (!header.authorization)
+  if (!cookieWithToken)
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized',
     })
 
   // Verify the old token
-  const oldToken = (header.authorization as string).replace('Bearer ', '')
   const secret = useRuntimeConfig().JWT_secret
 
   let verified: UserJwtPayload = {
@@ -20,7 +19,7 @@ export default defineEventHandler(async (event) => {
     roles: [''],
   }
 
-  jwt.verify(oldToken, secret, (err, payload) => {
+  jwt.verify(cookieWithToken, secret, (err, payload) => {
     if (err) {
       const msg =
         err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message
@@ -47,11 +46,22 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Cannot sign new token',
     })
 
+  // Delete the old cookie and set a new cookie with newToken
+  deleteCookie(event, 'access_token')
+
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 1) /** One day from now */
+
+  setCookie(event, 'access_token', newToken, {
+    expires: expiresAt,
+    httpOnly: true,
+    // secure: process.env.NODE_ENV === 'production', /** For HTTPS connection */
+    sameSite: 'strict',
+    path: '/',
+  })
+
   return {
     user: user,
     newToken,
   }
 })
-
-// To do:
-// get Token from localStorage/cookie

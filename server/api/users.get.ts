@@ -3,19 +3,18 @@ import { UserJwtPayload } from '~~/types/user'
 import { getUsers } from '../db/user'
 
 export default defineEventHandler(async (event) => {
-  const header = event.node.req.headers
+  const cookieWithToken = getCookie(event, 'access_token')
 
-  if (header.authorizationt)
+  if (!cookieWithToken)
     throw createError({
       statusCode: 401,
       statusMessage: 'Access forbidden',
     })
 
   // Verify the token and check if the user is ADMIN
-  const oldToken = (header.authorization as string).replace('Bearer ', '')
   const secret = useRuntimeConfig().JWT_secret
 
-  jwt.verify(oldToken, secret, (err, payload) => {
+  jwt.verify(cookieWithToken, secret, (err, payload) => {
     if (err) {
       const msg =
         err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message
