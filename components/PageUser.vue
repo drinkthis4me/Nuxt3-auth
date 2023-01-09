@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-slate-300 p-5 w-1/2  max-w-md">
+  <div class="w-1/2 max-w-md bg-slate-300 p-5">
     <code class="break-words">
       current user: {{ JSON.stringify(authStore.currentUser, null, 2) }}
     </code>

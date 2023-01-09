@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken'
-import { getUserByEmail } from '~~/server/db/user'
 import { UserJwtPayload } from '~~/types/user'
 
 export default defineEventHandler(async (event) => {
@@ -11,11 +10,10 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Unauthorized',
     })
 
+  // Verify the old token
   const oldToken = (header.authorization as string).replace('Bearer ', '')
-
   const secret = useRuntimeConfig().JWT_secret
 
-  // Verify the old token
   let verified: UserJwtPayload = {
     id: '',
     email: '',

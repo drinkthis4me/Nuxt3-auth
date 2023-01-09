@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen items-center justify-center bg-violet-300">
     <div class="flex-1 p-10">
-      <PageErrorbanner
+      <PageErrorBanner
         v-show="formInput.error.length > 0"
         :msg="formInput.error" />
       <div class="mx-auto w-80 overflow-hidden rounded-2xl bg-white shadow-lg">

@@ -6,8 +6,6 @@ import jwt from 'jsonwebtoken'
 export default defineEventHandler(async (event) => {
   const body = await readBody<LoginBody>(event)
 
-  const { email, password } = body
-
   let userFromDB: User = {
     id: '',
     email: '',
@@ -16,7 +14,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Check if email or password is missing
-  if (!email || !password) {
+  if (!body.email || !body.password) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Email and password are required',
@@ -24,7 +22,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Check if user exists
-  await getUserByEmail(email).then((response) => {
+  await getUserByEmail(body.email).then((response) => {
     if (!response) {
       throw createError({
         statusCode: 401,
@@ -34,9 +32,9 @@ export default defineEventHandler(async (event) => {
     userFromDB = response
   })
 
-  // verify pw
+  // Verify password
   await bcrypt
-    .compare(password, userFromDB.password as string)
+    .compare(body.password, userFromDB.password as string)
     .then((result) => {
       if (!result)
         throw createError({
@@ -45,7 +43,7 @@ export default defineEventHandler(async (event) => {
         })
     })
 
-  // Issue a JWT
+  // Issue a JWT token
   const jwtPayload = {
     id: userFromDB.id,
     email: userFromDB.email,

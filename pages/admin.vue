@@ -5,7 +5,7 @@
         <div class="text-bold text-2xl">Admin Page</div>
         <div>This page is Admin only</div>
         <PageUser />
-        <PageErrorbanner :msg="errorMsg" v-show="errorMsg.length > 0" />
+        <PageErrorBanner :msg="errorMsg" v-show="errorMsg.length > 0" />
         <div>List for all users</div>
         <table class="table w-full table-auto">
           <div class="table-header-group">

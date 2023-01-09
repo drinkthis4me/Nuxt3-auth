@@ -1,19 +1,28 @@
 import { getUserByEmail, addNewUser } from '~~/server/db/user'
 import type { SingupBody } from '~~/types/user'
+import jwt from 'jsonwebtoken'
 export default defineEventHandler(async (event) => {
   const body = await readBody<SingupBody>(event)
 
-  const duplucateUser = await getUserByEmail(body.email)
+  if (!body.email || !body.password)
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Bad request: no email or password',
+    })
 
-  if (duplucateUser) {
+  // Check duplicate user
+  const duplicateUser = await getUserByEmail(body.email)
+
+  if (duplicateUser) {
     throw createError({
       statusCode: 409,
       statusMessage: 'This email already exists',
     })
   }
 
+  // Create a new user
   const newUser = {
-    id: Math.floor(Math.random() * 1000).toString(),
+    id: new Date().toString(),
     email: body.email,
     password: body.password,
     roles: ['USER'],
@@ -21,8 +30,17 @@ export default defineEventHandler(async (event) => {
 
   addNewUser(newUser)
 
+  // Issue a jwt token
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {password: _password, ...newUserWithoutPw } = newUser
+const {password, ...payload} = newUser 
+  const secret = useRuntimeConfig().JWT_secret
+  const jwtToken = jwt.sign(payload, secret, { expiresIn: '24h' })
 
-  return newUserWithoutPw
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password: _password, ...newUserWithoutPw } = newUser
+  const userWithToken = { ...newUserWithoutPw, jwtToken }
+
+  return {
+    user: userWithToken,
+  }
 })

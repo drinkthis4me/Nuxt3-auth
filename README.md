@@ -81,6 +81,9 @@ Redirect to different page according to the user info.
   State of current user. Store the current user's id, email and roles.
 
 ## useAuthStore.ts
+- useAuthStore.currentUser
+  
+  State of the current user's id, email, roles and a JWT token.
 
 - useAuthStore.login():
 
@@ -88,9 +91,9 @@ Redirect to different page according to the user info.
 
   Call api: '/auth/login'
 
-  Set userInfoStore.user state to response.
+  Set useAuthStore.currentUser state to response.
 
-  planned: store token/cookie in localStorage.
+  Store jwt Token in localStorage.
 
 - useAuthStore.logout()
  
@@ -98,53 +101,58 @@ Redirect to different page according to the user info.
 
   Clear user state.
 
-  Planned: clear token/cookie in localStorage.
+  Clear jwt Token from localStorage.
 
--  useAuthStore.me()
+- useAuthStore.whoAmI()
   
-   Planned: fetch token/cookie and set userInfoStore.user state.
+  Call api: '/auth/whoami'
 
--  useauthStore.signup()
+  Set useAuthStore.currentUser state to response.
   
-    Call api: '/auth/signup' to register a new user. 
+   Planned: fetch token/cookie
+
+- useauthStore.signup()
+  
+  Call api: '/auth/signup' 
+
+  Set useAuthStore.currentUser state to response.
+
+  Store jwt Token in localStorage.
+
 
 # server
 
 A fake backend server with api.
 
 ## routes/auth/login.post.ts
-Receive request body.
-
-Check if email or password is blank.
-
-Check if email exists in the data base.
-
-Verify pw with bcrypt.js.
-
-Finally return user data without password.
+- Read and check request body.
+- Check if user exists in the data base.
+- Verify the password with bcrypt.js.
+- Issue a JWT token.
+- Return user info and token.
 
 ## routes/auth/logout.post.ts
-return user as null
+- Check JWT token from request body.
+- Return user as null.
 
-## routes/auth/me.get.ts
-work in progress
-
+## routes/auth/whoami.get.ts
+- Read and check authorization header.
+- verify the old token.
+- Issue a new token with prolonged life.
+- Return user info and new token.
+  
 ## routes/auth/signup.post.ts
-receive request body.
-
-Check if email already exists in the data base.
-
-Create a new user object.
-
-Push new user to the data base.
-
-Finally return user data without password.
+- Receive and check request body. 
+- Check if email already exists in the data base (duplicate user).
+- Create a new user.
+- Push new user to the data base.
+- Issue a jwt token
+- Return user info and token.
 
 Planned: hash the password
 
 ## api/users.get.ts
 List of all user.
-
-Check if user is admin.
-
-Simulate fetching delay by setTimeout.
+- Read and check authorization header.
+- Simulate fetching delay by setTimeout.
+- Return all users list

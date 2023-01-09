@@ -41,8 +41,12 @@ export const useAuthStore = defineStore('auth', () => {
       currentUser.value = response.user
       console.log('>>> Logout request', response)
     })
+    .catch(e => {
+      console.error('>>> Logout error: ',e)
+      throw e
+    })
 
-    // Clear localStorage
+    // Clear token from localStorage
     userFromLocalStorage.value = null
   }
 
@@ -52,6 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
       headers: { authorization: `Bearer ${token}` },
     })
       .then((response) => {
+        console.log('>>> whoAmI request: ', response)
         currentUser.value = response.user
         return response
       })
@@ -68,6 +73,8 @@ export const useAuthStore = defineStore('auth', () => {
     })
       .then((response) => {
         console.log('>>> Sign up request: ', response)
+        currentUser.value = response.user
+        userFromLocalStorage.value = response.user.jwtToken
       })
       .catch((error) => {
         throw error
