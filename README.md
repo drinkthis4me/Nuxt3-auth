@@ -1,5 +1,15 @@
 # Nuxt 3 Auth example
-table of content
+This is a learning project base on [damien-hl's repo](https://github.com/damien-hl/nuxt3-auth-example).
+
+I do not come up with this on my own.
+
+Dependencies:
+
+- [pinia](https://pinia.vuejs.org/): state management
+- [bcryptjs](https://github.com/dcodeIO/bcrypt.js): hash the user password
+- [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken): API authentication 
+
+
 # Setup
 
 Install, develop, and production
@@ -26,12 +36,12 @@ npm run build
 ## /login
   
   Provide two methods to log in: 
-  1. Email & password credencial
-  2. Google oAuth
+  1. Email & password credential
+  2. Google oAuth (TBD)
    
   This page is for guest only (not logged-in user).
 
-  Already logged-in Users will be redirect to '/' via middleware: guest-only.ts
+  Already logged-in Users will be redirect to '/' by middleware: guest-only.ts
 
 ## /signup
   
@@ -43,36 +53,38 @@ npm run build
 
   List for all users and data.
 
-  Not admin will be redirect to '/login' via middleware: admin-only.ts
+  Not admin will be redirect to '/login' by middleware: admin-only.ts
 
 ##  /private
   
   This page is for logged-in user only.
 
-  Guest will be redirect to '/login' via middleware: user-only.ts
+  Guest will be redirect to '/login' by middleware: user-only.ts
 
 # components
 ##  LoginForm.vue
   
-  Receive user input and call authStore.login() from pinia store.
+Receive user input and call authStore.login() from pinia store.
 
-  If login success, emit success and redirect to '/'.
+If login success, emit success and redirect to '/'.
 
-  Else display error message.
+Else display error message.
 
 ##  SignupForm.vue
   
-  work in progress
+Receive user input and call authStore.signup() from pinia store.
+
+If login success, emit success and redirect to '/'.
 
 ##  NavBar.vue
 
-  Look up the current user info via userInfoStore from pinia store.
+Look up the current user info by calling authStore.whoami() from pinia store.
 
-  Conditional show login/ signup/ logout links.
+Conditionally show login/ signup/ logout links.
 
 # middleware
 
-Check the current user info via userInfoStore from pinia store.
+Check the current user info by userInfoStore from pinia store.
 
 Redirect to different page according to the user info.
 
@@ -93,15 +105,11 @@ Redirect to different page according to the user info.
 
   Set useAuthStore.currentUser state to response.
 
-  Store jwt Token in localStorage.
-
 - useAuthStore.logout()
  
   Call api: '/auth/logout'
 
   Clear user state.
-
-  Clear jwt Token from localStorage.
 
 - useAuthStore.whoAmI()
   
@@ -109,16 +117,13 @@ Redirect to different page according to the user info.
 
   Set useAuthStore.currentUser state to response.
   
-   Planned: fetch token/cookie
+- useAuthStore.signup()
 
-- useauthStore.signup()
+  Receive email and password.
   
   Call api: '/auth/signup' 
 
   Set useAuthStore.currentUser state to response.
-
-  Store jwt Token in localStorage.
-
 
 # server
 
@@ -129,32 +134,45 @@ A fake backend server with api.
 - Check if user exists in the data base.
 - Verify the password with bcrypt.js.
 - Issue a JWT token.
+- Store the token in cookie.
 - Return user info and token.
 
 ## routes/auth/logout.post.ts
-- Check JWT token from request body.
+- Check JWT token from cookie.
+- Delete the cookie.
 - Return user as null.
 
 ## routes/auth/whoami.get.ts
-- Read and check authorization header.
+- Check JWT token from cookie.
 - verify the old token.
 - Issue a new token with prolonged life.
+- Store the token in cookie.
 - Return user info and new token.
   
 ## routes/auth/signup.post.ts
 - Receive and check request body. 
 - Check if email already exists in the data base (duplicate user).
+- Hash the password.
 - Create a new user.
 - Push new user to the data base.
-- Issue a jwt token
+- Issue a JWT token.
+- Store the token in cookie.
 - Return user info and token.
 
-Planned: hash the password
-
 ## api/users.get.ts
-List of all user.
-- Read and check authorization header.
+List of all users.
+- Check JWT token from cookie.
 - Verify the token.
 - Check if the request is from ADMIN.
-- Simulate fetching delay by setTimeout.
+- Simulate a fetching delay by setTimeout.
 - Return all-users list.
+
+# Todo
+- Implement remember me for log in user.
+- Use environment variables for cookie and private key.
+  
+# License
+
+MIT.
+
+See LICENSE file for details.
